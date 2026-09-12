@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# 环境与密钥
+.env
+
+# 检索索引产物（可由 ingest 重建）
+backend/index/*.faiss
+backend/index/meta.json
+
+# 公司语料（信息安全：绝不入库）
+corpus-data/company/
+company_*
+
+# Node
+node_modules/
+frontend/dist/
+*.local
+
+# IDE / OS
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store

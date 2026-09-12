@@ -1,0 +1,12 @@
+# 可插拔语料配置：增删 source 或替换路径后重跑 ingest 即可，业务代码零改动
+sources:
+  - type: fs_md
+    source_id: public-specs
+    path: corpus-data/specs # 相对仓库根目录
+    enabled: true
+
+  # 公司语料示例（信息安全：路径经环境变量注入，不写入本文件、不入 git）
+  # - type: company
+  #   source_id: company-specs
+  #   path_env: COMPANY_CORPUS_PATH
+  #   enabled: true
