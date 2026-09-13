@@ -1,0 +1,160 @@
+# 规范问答 Agent 评测集
+# type: factual 事实题（单条款） | multihop 多跳题（跨条款） | review 代码审查题
+# expected_chunks: 期望命中的 chunk id；violation_keywords: 审查输出必须出现的关键词（不区分大小写）
+questions:
+  # ---- 10 事实题 ----
+  - id: f01
+    type: factual
+    question: CSS 类名应该怎么命名？
+    expected_chunks: ["public-specs/命名规范#CSS-类名命名"]
+    expected_points: 类名采用 BEM（block__element--modifier）；禁止拼音与无意义缩写
+  - id: f02
+    type: factual
+    question: 组件的 props 应该怎么设计？
+    expected_chunks: ["public-specs/组件设计规范#Props-设计"]
+    expected_points: props 显式声明类型、必填/默认值约定、禁止修改 prop
+  - id: f03
+    type: factual
+    question: v-for 为什么要用稳定的 key？
+    expected_chunks: ["public-specs/Vue-组件编写规范#v-for-与-key"]
+    expected_points: 禁止用 index 作 key，应使用唯一稳定 id
+  - id: f04
+    type: factual
+    question: ref 和 reactive 应该怎么选？
+    expected_chunks: ["public-specs/Vue-组件编写规范#响应式选择-ref-与-reactive"]
+    expected_points: ref/reactive 的选择标准与使用约定
+  - id: f05
+    type: factual
+    question: Git 提交信息有什么格式要求？
+    expected_chunks: ["public-specs/Git-提交与分支规范#提交信息Conventional-Commits"]
+    expected_points: "Conventional Commits 格式（type(scope): subject）"
+  - id: f06
+    type: factual
+    question: 登录 token 应该存在哪里？
+    expected_chunks:
+      - "public-specs/状态管理规范#持久化与初始化"
+      - "public-specs/前端安全规范#CSRF-与鉴权"
+    expected_points: 默认内存 + sessionStorage，禁止 localStorage 明文长期持有
+  - id: f07
+    type: factual
+    question: TypeScript 里可以用 any 吗？
+    expected_chunks: ["public-specs/TypeScript-编码规范#严格模式与-any"]
+    expected_points: 禁止使用 any；不确定类型时优先 unknown + 类型收窄
+  - id: f08
+    type: factual
+    question: 业务代码应该放在哪个目录？
+    expected_chunks: ["public-specs/项目目录结构#features-业务域"]
+    expected_points: 按 features 业务域划分目录
+  - id: f09
+    type: factual
+    question: 接口调用失败要怎么处理？
+    expected_chunks: ["public-specs/接口调用规范#错误处理"]
+    expected_points: 统一错误处理、用户提示与重试约定
+  - id: f10
+    type: factual
+    question: 前端如何防 XSS？
+    expected_chunks: ["public-specs/前端安全规范#XSS-防护"]
+    expected_points: 禁止 v-html 渲染未消毒内容等 XSS 防护要求
+
+  # ---- 5 多跳题 ----
+  - id: m01
+    type: multihop
+    question: 生产环境可以在日志里打印用户的手机号吗？
+    expected_chunks:
+      - "public-specs/前端安全规范#敏感数据与其他"
+      - "public-specs/代码审查清单#安全检查"
+    expected_points: 敏感信息禁止打印日志；审查清单中安全检查项
+  - id: m02
+    type: multihop
+    question: 用户快速切换 Tab 导致接口返回乱序怎么办？
+    expected_chunks:
+      - "public-specs/接口调用规范#请求取消与竞态"
+    expected_points: 请求取消（AbortController）与竞态处理
+  - id: m03
+    type: multihop
+    question: 页面抛出的异常应该怎么兜底和上报？
+    expected_chunks:
+      - "public-specs/异常与错误处理规范#全局兜底"
+      - "public-specs/异常与错误处理规范#上报与追踪"
+    expected_points: 全局错误兜底 + 统一上报追踪
+  - id: m04
+    type: multihop
+    question: 组件里 setInterval 的定时器销毁时要处理吗？
+    expected_chunks:
+      - "public-specs/Vue-组件编写规范#生命周期与清理"
+    expected_points: 生命周期中清理副作用（定时器/监听）
+  - id: m05
+    type: multihop
+    question: 首屏图片加载慢有什么优化手段？
+    expected_chunks:
+      - "public-specs/前端性能规范#加载性能"
+      - "public-specs/前端性能规范#资源优化"
+    expected_points: 懒加载、压缩、格式选择等资源优化手段
+
+  # ---- 5 代码审查题 ----
+  - id: r01
+    type: review
+    question: |
+      审查这段代码：
+      ```ts
+      const token = localStorage.setItem('token', rawToken)
+      list.map((item, idx) => <div key={idx}>{item.name}</div>)
+      ```
+    expected_chunks:
+      - "public-specs/前端安全规范#CSRF-与鉴权"
+      - "public-specs/Vue-组件编写规范#v-for-与-key"
+    violation_keywords: ["localStorage", "key"]
+  - id: r02
+    type: review
+    question: |
+      审查这段代码：
+      ```vue
+      <template>
+        <div v-html="userComment"></div>
+      </template>
+      <script setup lang="ts">
+      const userComment = fetchComment() as any
+      </script>
+      ```
+    expected_chunks:
+      - "public-specs/前端安全规范#XSS-防护"
+      - "public-specs/TypeScript-编码规范#严格模式与-any"
+    violation_keywords: ["v-html", "any"]
+  - id: r03
+    type: review
+    question: |
+      审查这段代码：
+      ```ts
+      function calcPrice(price: number) {
+        console.log('debug', price)
+        return price * 1.13
+      }
+      ```
+    expected_chunks:
+      - "public-specs/代码审查清单#通用检查项"
+    violation_keywords: ["console"]
+  - id: r04
+    type: review
+    question: |
+      审查这段代码：
+      ```ts
+      async function loadUser(id: string) {
+        const res = await fetch(`/api/user/${id}`)
+        return res.json()
+      }
+      ```
+    expected_chunks:
+      - "public-specs/异常与错误处理规范#异步错误"
+    violation_keywords: ["catch"]
+  - id: r05
+    type: review
+    question: |
+      审查这段代码（UserCard.vue 单文件超过 900 行，包含列表、弹窗、导出 Excel 逻辑）：
+      ```vue
+      <script setup lang="ts">
+      // 900 行单文件组件：列表渲染 + 弹窗 + Excel 导出全部写在一起
+      </script>
+      ```
+    expected_chunks:
+      - "public-specs/组件设计规范#单一职责与体积"
+    violation_keywords: ["职责"]
