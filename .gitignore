@@ -25,3 +25,6 @@ frontend/dist/
 .vscode/
 Thumbs.db
 .DS_Store
+
+# 个人文档（不入库）
+PLAN.md
